@@ -12,6 +12,8 @@ export default class ProfileView extends Component {
                 name: "Cristiano Ronaldo",
                 image: 'https://lh3.googleusercontent.com/-5Np5L5brFEo/VyuZhRH1vkI/AAAAAAAAA6g/-PBgmsQXuyY/s640/Cristiano-Ronaldo-dp-profile-pics-1423.jpg',
                 birthday: '',
+                address:'123 XLHN',
+                team:'Wolf team',
                 gender: 'Nam',
                 mail: 'ronaldo@cr7.com',
                 phone:'0123 456 789',
@@ -79,6 +81,13 @@ export default class ProfileView extends Component {
                 </View>
 
                 <View style={{flex: 1, backgroundColor: 'white'}}>
+
+                    <View style={profileStyles.infoView}>
+                        <Icon name="md-people" size={30} color="#16a085"/>
+                        <View style={{borderBottomWidth: 1, borderColor: '#ecf0f1', padding: 10, flex: 1}}>
+                            <Text style={profileStyles.infoText}>{this.state.user.team}</Text>
+                        </View>
+                    </View>
 
                     <View style={profileStyles.infoView}>
                         <Icon name="md-call" size={30} color="#16a085"/>
