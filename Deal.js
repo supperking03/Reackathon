@@ -133,18 +133,18 @@ export default class Deal extends Component {
         super(props);
 
         this.state = {
-            id: "",
+            id: this.props.navigation.state.params.Id,
             type: "All",
             age: "All",
             district: "All",
             date: new Date(),
             timeStart: new Date(0, 0, 0, new Date().getHours(), new Date().getMinutes(), 0, 0),
             timeEnd: new Date(0, 0, 0, new Date().getHours() + 1, new Date().getMinutes(), 0, 0),
-            latitude: LATITUDE,
-            longitude: LONGITUDE,
+            latitude: this.props.navigation.state.params.Latitude,
+            longitude: this.props.navigation.state.params.Longitude,
             myCoordinate: {
-                latitude:  LATITUDE,
-                longitude: LONGITUDE,
+                latitude:  this.props.navigation.state.params.Latitude,
+                longitude: this.props.navigation.state.params.Longitude,
             },
             currentPosition: 0,
             mapDelta:
@@ -161,73 +161,73 @@ export default class Deal extends Component {
 
     }
 
-    // BacktoMap = ()=>{
-    //     this.props.navigation.navigate('ManHinh_Map', {
-    //         Id: this.props.navigation.state.params.Id,
-    //     });
-    //
-    // }
-    //
-    // InsertDataToServer = () => {
-    //     const TextInputType = this.state.type;
-    //     const TextInputAge = this.state.age;
-    //     const TextInputDate = this.state.date.getDay() + "/" + this.state.date.getMonth() + "/" + this.state.date.getFullYear();
-    //     const TextInputId = this.state.id;
-    //     const TextInputTime1 = this.state.timeStart.getHours() + ":" + this.state.timeStart.getMinutes() + ((this.state.timeStart.getHours() < 12) ? " AM" : " PM")
-    //     const TextInputTime2 = this.state.timeEnd.getHours() + ":" + this.state.timeEnd.getMinutes() + ((this.state.timeStart.getHours() < 1) ? " AM" : " PM")
-    //     const TextInputPosition = this.state.district;
-    //     const TextInputLat = this.state.latitude;
-    //     const TextInputLong = this.state.longitude;
-    //
-    //     //alert(TextInputTime1 + "," + TextInputTime2 + "," +TextInputDate);
-    //     // this.setState({
-    //     //     isLoading: true,
-    //     // });
-    //
-    //
-    //     fetch('http://71dongkhoi.esy.es/submit_deal_info.php', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Accept': 'application/json',
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify({
-    //
-    //             type: TextInputType,
-    //
-    //             id: TextInputId,
-    //
-    //             age: TextInputAge,
-    //
-    //             date: TextInputDate,
-    //
-    //             time1: TextInputTime1,
-    //
-    //             time2: TextInputTime2,
-    //
-    //             position: TextInputPosition,
-    //
-    //             latitude: TextInputLat,
-    //
-    //             longitude: TextInputLong,
-    //
-    //         })
-    //
-    //     }).then((response) => response.json())
-    //         .then((responseJson) => {
-    //             // this.setState({
-    //             //     isLoading: false,
-    //             // });
-    //             // Showing response message coming from server after inserting records.
-    //             alert(responseJson);
-    //             this.BacktoMap();
-    //
-    //         }).catch((error) => {
-    //         console.error(error);
-    //     });
-    //
-    //
-    // };
+    BacktoMap = ()=>{
+        this.props.navigation.navigate('ManHinh_Map', {
+            Id: this.props.navigation.state.params.Id,
+        });
+
+    }
+
+    InsertDataToServer = () => {
+        const TextInputType = this.state.type;
+        const TextInputAge = this.state.age;
+        const TextInputDate = this.state.date.getDate() + "/" + this.state.date.getMonth() + "/" + this.state.date.getFullYear();
+        const TextInputId = this.state.id;
+        const TextInputTime1 = this.state.timeStart.getHours() + ":" + this.state.timeStart.getMinutes() + ((this.state.timeStart.getHours() < 12) ? " AM" : " PM")
+        const TextInputTime2 = this.state.timeEnd.getHours() + ":" + this.state.timeEnd.getMinutes() + ((this.state.timeStart.getHours() < 1) ? " AM" : " PM")
+        const TextInputPosition = this.state.district;
+        const TextInputLat = this.state.latitude;
+        const TextInputLong = this.state.longitude;
+
+        //alert(TextInputTime1 + "," + TextInputTime2 + "," +TextInputDate);
+        // this.setState({
+        //     isLoading: true,
+        // });
+
+
+        fetch('http://71dongkhoi.esy.es/submit_deal_info.php', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+
+                type: TextInputType,
+
+                id: TextInputId,
+
+                age: TextInputAge,
+
+                date: TextInputDate,
+
+                time1: TextInputTime1,
+
+                time2: TextInputTime2,
+
+                position: TextInputPosition,
+
+                latitude: TextInputLat,
+
+                longitude: TextInputLong,
+
+            })
+
+        }).then((response) => response.json())
+            .then((responseJson) => {
+                // this.setState({
+                //     isLoading: false,
+                // });
+                // Showing response message coming from server after inserting records.
+                alert(responseJson);
+                this.BacktoMap();
+
+            }).catch((error) => {
+            console.error(error);
+        });
+
+
+    };
 
     maxDate = (addition) =>{
         var today = new Date();
@@ -618,7 +618,7 @@ export default class Deal extends Component {
                     </View>
                     <View style={{
                         backgroundColor: 'rgba(255,255,255 ,0.85)',
-                        height: height(7),
+                        height: height(10),
                         margin: height(2),
                         borderRadius: 5,
                         marginTop: -height(80) + height(2),
@@ -628,7 +628,7 @@ export default class Deal extends Component {
                         <View style={{flex: 2, justifyContent: 'center'}}>
                             <View style={{flex: 1}}>
                                 <View style={{flexDirection: 'row', alignItems: 'center',}}>
-                                    <Text style={{fontSize: 17, color: '#2c3e50', marginTop: 10,}}>
+                                    <Text style={{fontSize: 17, color: '#2c3e50', marginTop: 10}}>
                                         {"My location : " + this.state.place}</Text>
                                 </View>
                             </View>
@@ -742,7 +742,7 @@ export default class Deal extends Component {
                                     {"Age : " + this.state.age}</Text>
                                 <View style={{flexDirection: 'column'}}>
                                     <Text style={{fontSize: 20, color: '#2c3e50', marginTop: 20,}}>
-                                        {"Date :  " + this.state.date.getDay() + "/" + this.state.date.getMonth() + "/" + this.state.date.getFullYear()}</Text>
+                                        {"Date :  " + this.state.date.getDate() + "/" + this.state.date.getMonth() + "/" + this.state.date.getFullYear()}</Text>
                                     <Text style={{fontSize: 20, color: '#2c3e50', marginTop: 10, marginLeft: 20}}>
                                         {" at : " + this.state.timeStart.getHours() + ":" + this.state.timeStart.getMinutes() + ((this.state.timeStart.getHours() < 12) ? " AM" : " PM") + " - " + this.state.timeEnd.getHours() + ":" + this.state.timeEnd.getMinutes() + ((this.state.timeStart.getHours() < 1) ? " AM" : " PM")}</Text>
                                 </View>
@@ -785,9 +785,7 @@ export default class Deal extends Component {
                                         </View>
                                     </TouchableOpacity>
                                     <TouchableOpacity
-                                        onPress={() => {
-                                            this.setState({currentPosition: 1})
-                                        }}
+                                        onPress={this.InsertDataToServer}
                                         style={{
                                             alignItems: 'center',
                                             justifyContent: 'center',
@@ -795,7 +793,7 @@ export default class Deal extends Component {
                                             borderRadius: 15,
                                         }}>
                                         <View style={{width: width(30),flexDirection: 'row', justifyContent: 'center'}}>
-                                            <FontAwesome size={18} name="newspaper-o" color="white"/>
+                                            <FontAwesome size={20} name="newspaper-o" color="white"/>
                                             <Text style={{
                                                 color: 'white',
                                                 fontSize: 18,

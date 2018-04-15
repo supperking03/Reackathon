@@ -165,6 +165,9 @@ export default class Map extends Component {
                     time2: "",
                     url:"",
                     position:"",
+                    phone :'',
+                    mail :'',
+                    about:'',
                 },
             mapRegion:
                 {
@@ -191,9 +194,9 @@ export default class Map extends Component {
     FilterUsers = (type, age, position) => {
         var _result = [];
         var _type = (type == null) ? this.state.type : type;
-        if (_type != "Tất cả") {
+        if (_type != "All") {
             this.state.users.map(user => {
-                if (user.type == _type || user.type == "Tất cả") {
+                if (user.type == _type || user.type == "All") {
 
                     _result.push(user);
                 }
@@ -204,38 +207,40 @@ export default class Map extends Component {
         }
         var _result2 = _result.slice();
         var _age = (age == null) ? this.state.age : age;
-        if (_age != "Tất cả") {
+        if (_age != "All") {
             _result.map(user => {
-                if (user.age != _age && user.age != "Tất cả") {
+                if (user.age != _age && user.age != "All") {
                     _result2.pop(user);
                 }
             })
         }
         var _result3 = _result2.slice();
         var _position = (position == null) ? this.state.district : position;
-        if (_position != "Tất cả") {
+        if (_position != "All") {
             _result2.map(user => {
-                if (user.position != _position && user.position != "Tất cả") {
+                if (user.position != _position && user.position != "All") {
                     _result3.pop(user);
                 }
             })
         }
 
         this.setState({filter: _result3})
-    }
+    };
 
     LoadData = async () => {
         return await fetch('http://71dongkhoi.esy.es/getDeal.php')
             .then((response) => response.json())
             .then((responseJson) => {
                 //this.setState({users: responseJson});
-                console.log(responseJson);
+
+
+            //    console.log(responseJson);
                 this.setState({users: responseJson, filter: responseJson});
             })
             .catch((error) => {
                 console.error(error);
             });
-    }
+    };
 
 
     hasLocationPermission = async () => {
@@ -283,7 +288,6 @@ export default class Map extends Component {
             },
             (error) => {
                 // See error code charts below.
-                alert(error.message);
             }, {enableHighAccuracy: false, timeout: 25000}
         );
     }
@@ -323,7 +327,7 @@ export default class Map extends Component {
                                     }
                                 });
 
-                                console.log(region.longitude);
+                             //   console.log(region.longitude);
                             }
                         }}
 
@@ -335,6 +339,7 @@ export default class Map extends Component {
                                         key={user.id}
                                         title={user.name}
                                         onPress={() => {
+
                                             this.setState({visibleMap: true});
                                             this.setState({
                                                 currentUser: {
@@ -346,8 +351,13 @@ export default class Map extends Component {
                                                     time2: user.time2,
                                                     url : user.url,
                                                     position: user.position,
+                                                    phone : user.phone,
+                                                    email : user.email,
+                                                    about: user.about,
                                                 },
                                             });
+                                      //      console.log(this.state.currentUser);
+
                                             axios.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + user.latitude + ',' + user.longitude + '&key=AIzaSyC-H415RwIwooot2IeOqn9SsX1jEof8QxA') // be sure your api key is correct and has access to the geocode api
                                                 .then(response => {
                                                     var address = response.data.results[0].formatted_address.toString().split(/,/);
@@ -363,6 +373,7 @@ export default class Map extends Component {
                                                 longitude: parseFloat(user.longitude),
                                             }
                                         }>
+
                                         <CustomMarkers
                                             avatar={user.url}>
                                         </CustomMarkers>
@@ -402,7 +413,10 @@ export default class Map extends Component {
                     }}>
                         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                             <View style={{margin: 1, borderRightWidth: 1, borderColor: 'grey'}}>
-                                <TouchableOpacity>
+                                <TouchableOpacity
+                                onPress={()=> {
+                                    return this.props.navigation.navigate('ManHinh_DealListView');
+                                 }}>
                                     <View style={{marginRight: 5}}>
                                         <FontAwesome name="search" size={height(3)} color="#4CAF50"/>
                                     </View>
@@ -483,12 +497,15 @@ export default class Map extends Component {
                             <View style={{backgroundColor: 'white', height: height(42)}}>
                                 <DealDetailsMiniView
                                     name={this.state.currentUser.name}
+                                    name={this.state.currentUser.name}
                                     type={this.state.currentUser.type}
                                     date={this.state.currentUser.date}
                                     time1={this.state.currentUser.time1}
                                     time2={this.state.currentUser.time2}
                                     avatar={this.state.currentUser.url}
                                     position={this.state.currentUser.position}
+                                    phone={this.state.currentUser.phone}
+                                    This = {this}
                                 />
                             </View>
 
@@ -527,6 +544,11 @@ export default class Map extends Component {
                             offsetX={width(5)}
                             title={"Make a deal"}
                             spaceBetween={5} onPress={() => {
+                            this.props.navigation.navigate('ManHinh_Deal', {
+                                Id: this.props.navigation.state.params.Id,
+                                Latitude : this.state.myCoordinate.latitude,
+                                Longitude : this.state.myCoordinate.longitude
+                            });
 
                         }}>
                             <MaterialCommunityIcons name="soccer" color="#4CAF50" size={width(4)}/>
@@ -541,7 +563,10 @@ export default class Map extends Component {
                     onRequestClose={() => this.setState({visible: false})}
                     showBackdrop={false}>
                     <View style={{
-                        backgroundColor: 'white',
+                        borderTopWidth: 2,
+                        borderColor:'#95a5a6',
+                        borderRadius: 10,
+                        backgroundColor: '#f5f6fa',
                         height: height(40),
                         marginLeft: width(1),
                         marginRight: width(1)
@@ -555,111 +580,113 @@ export default class Map extends Component {
                                 }
                             }}>
                             <View style={{
+                                margin:5,
+                                borderRadius: 10,
                                 alignItems: 'center',
-                                backgroundColor: '#AED581',
-                                borderColor: '#9CCC65',
-                                borderWidth: 1,
+                                backgroundColor: '#f5f6fa',
                             }}>
-                                <Text style={{fontSize: height(4)}}>Filter</Text>
+                                <Text style={{fontSize: height(4), color: "#2c3e50", fontFamily:'helveticaneuemedium'}}>filter</Text>
                             </View>
                         </TouchableOpacity>
-                        <View style={{flex: 0.1}}/>
-                        <View style={{
-                            flexDirection: 'row',
-                            flex: 1.5,
-                            margin: 7,
-                            borderBottomColor: 'blue',
-                            borderBottomWidth: 1
-                        }}>
-                            <Text style={{marginLeft: 5, flex: 7, fontSize: height(3), fontWeight: 'bold'}}>Team's type
-                                : </Text>
-                            <View style={{flex: 4}}>
-                                <ModalDropdown
-                                    dropdownStyle={{width: width(40), height: height(5) * 3, alignItems: 'stretch'}}
-                                    textStyle={{color: '#EEEEEE'}}
-                                    dropdownTextStyle={{fontSize: height(3), textAlign: 'right'}}
-                                    options={['All', '5', '10']}
-                                    defaultIndex={0}
-                                    onSelect={(idx, type) => {
-                                        this.setState({type: type, draggable: true});
-                                        this.FilterUsers(type, null, null);
-                                    }}
-                                    onDropdownWillShow={() => this.setState({draggable: false})}
-                                    onDropdownWillHide={() => this.setState({draggable: true})}>
-                                    <View
-                                        style={{width: width(48), alignItems: 'center', height: height(5)}}>
-                                        <Text style={{fontSize: height(3)}}>{this.state.type}</Text>
-                                    </View>
-                                </ModalDropdown>
+                        <View style={{flex: 8, backgroundColor: "#f5f6fa", borderRadius: 5, margin: 10}}>
+                            <View style={{flex: 0.1}}/>
+                            <View style={{
+                                flexDirection: 'row',
+                                flex: 1.5,
+                                margin: 7,
+                                justifyContent:'space-between'
+                            }}>
+                                <View style={{borderRadius:3,marginBottom: 10,marginTop: 5, justifyContent:'center', alignItems:'center', backgroundColor:(this.state.type=='All')?'#c0392b':'#27ae60'}}>
+                                    <Text style={{margin: 5,color:'#f5f6fa', justifyContent: 'center', fontFamily:'helveticaneuemedium'}}>Teams type:</Text>
+                                </View>
+                                <View style={{width:width(50)}}>
+                                    <ModalDropdown
+
+                                        dropdownStyle={{width:width(50) ,height: height(5) * 3, alignItems: 'stretch'}}
+                                        textStyle={{color: '#EEEEEE', textAlign: 'right'}}
+                                        dropdownTextStyle={{fontSize: height(3), textAlign: 'right'}}
+                                        options={['All', '5', '10']}
+                                        defaultIndex={0}
+                                        onSelect={(idx, type) => {
+                                            this.setState({type: type, draggable: true});
+                                            this.FilterUsers(type, null, null);
+                                        }}
+                                        onDropdownWillShow={() => this.setState({draggable: false})}
+                                        onDropdownWillHide={() => this.setState({draggable: true})}>
+                                        <View
+                                            style={{alignItems:'flex-end', height: height(5)}}>
+                                            <Text style={{fontSize: height(3)}}>{this.state.type}</Text>
+                                        </View>
+                                    </ModalDropdown>
+                                </View>
+
                             </View>
-                            <View style={{flex: 1,}}/>
-                        </View>
-                        <View style={{
-                            flexDirection: 'row',
-                            flex: 1.5,
-                            margin: 7,
-                            borderBottomColor: 'blue',
-                            borderBottomWidth: 1
-                        }}>
-                            <Text style={{marginLeft: 5, flex: 7, fontSize: height(3), fontWeight: 'bold'}}>Age
-                                : </Text>
-                            <View style={{flex: 4}}>
-                                <ModalDropdown
-                                    dropdownStyle={{width: width(40), height: height(5) * 3, alignItems: 'stretch'}}
-                                    textStyle={{color: '#EEEEEE'}}
-                                    dropdownTextStyle={{fontSize: height(3), textAlign: 'right'}}
-                                    options={['All', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']}
-                                    defaultIndex={0}
-                                    onSelect={(idx, age) => {
-                                        this.setState({age: age, draggable: true});
-                                        this.FilterUsers(null, age, null);
-                                    }}
-                                    onDropdownWillShow={() => this.setState({draggable: false})}
-                                    onDropdownWillHide={() => this.setState({draggable: true})}>
-                                    <View style={{width: width(48), alignItems: 'center', height: height(5)}}>
-                                        <Text style={{fontSize: height(3)}}>{this.state.age}</Text>
-                                    </View>
-                                </ModalDropdown>
+                            <View style={{
+                                flexDirection: 'row',
+                                flex: 1.5,
+                                margin: 7,
+                                justifyContent:'space-between'
+                            }}>
+                                <View style={{borderRadius:3,marginBottom: 10,marginTop: 5, justifyContent:'center', alignItems:'center', backgroundColor:(this.state.age=='All')?'#c0392b':'#27ae60'}}>
+                                    <Text style={{margin: 5, color:'#f5f6fa', justifyContent: 'center', fontFamily:'helveticaneuemedium'}}>Age
+                                        : </Text>
+                                </View>
+                                <View style={{width:width(50)}}>
+                                    <ModalDropdown
+                                        dropdownStyle={{width:width(50),height: height(5) * 3, alignItems: 'stretch'}}
+                                        textStyle={{color: '#EEEEEE', textAlign: 'right'}}
+                                        dropdownTextStyle={{fontSize: height(3), textAlign: 'right'}}
+                                        options={['All', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']}
+                                        defaultIndex={0}
+                                        onSelect={(idx, age) => {
+                                            this.setState({age: age, draggable: true});
+                                            this.FilterUsers(null, age, null);
+                                        }}
+                                        onDropdownWillShow={() => this.setState({draggable: false})}
+                                        onDropdownWillHide={() => this.setState({draggable: true})}>
+                                        <View style={{ alignItems: 'flex-end', height: height(5)}}>
+                                            <Text style={{fontSize: height(3)}}>{this.state.age}</Text>
+                                        </View>
+                                    </ModalDropdown>
+                                </View>
                             </View>
-                            <View style={{flex: 1,}}/>
-                        </View>
-                        <View style={{
-                            flexDirection: 'row',
-                            flex: 1.5,
-                            margin: 7,
-                            borderBottomColor: 'blue',
-                            borderBottomWidth: 1
-                        }}>
-                            <Text style={{marginLeft: 5, flex: 7, fontSize: height(3), fontWeight: 'bold'}}>District
-                                : </Text>
-                            <View style={{flex: 4}}>
-                                <ModalDropdown
-                                    dropdownStyle={{
-                                        width: width(40),
-                                        height: height(5) * 3,
-                                        alignItems: 'stretch',
-                                    }}
-                                    textStyle={{color: '#EEEEEE'}}
-                                    dropdownTextStyle={{fontSize: height(3), textAlign: 'right'}}
-                                    options={['All', 'District 1', 'District 2', 'District 3', 'District 4', 'District 5', 'District 6', 'District 7', 'District 8', 'District 9', 'District 10', 'District 11', 'District 12', 'Bình Tân District', 'Bình Thạnh District', 'Gò Vấp District', 'Phú Nhuận District', 'Tân Bình District', 'Tân Phú District', 'Thủ Đức District', 'Khác..']}
-                                    defaultIndex={0}
-                                    onSelect={(idx, district) => {
-                                        this.setState({district: district, draggable: true})
-                                        this.FilterUsers(null, null, district);
-                                    }}
-                                    onDropdownWillShow={() => this.setState({draggable: false})}
-                                    onDropdownWillHide={() => this.setState({draggable: true})}>
-                                    <View style={{width: width(48), alignItems: 'center', height: height(5)}}>
-                                        <Text style={{fontSize: height(3)}}>{this.state.district}</Text>
-                                    </View>
-                                </ModalDropdown>
+                            <View style={{
+                                flexDirection: 'row',
+                                flex: 1.5,
+                                margin: 7,
+                                justifyContent: 'space-between'
+                            }}>
+                                <View style={{borderRadius:3,marginBottom: 10,marginTop: 5, justifyContent:'center', alignItems:'center', backgroundColor:(this.state.district=='All')?'#c0392b':'#27ae60'}}>
+                                    <Text style={{margin: 5, color:'#f5f6fa', justifyContent: 'center', fontFamily:'helveticaneuemedium'}}>District:</Text>
+                                </View>
+                                <View style={{width:width(50)}}>
+                                    <ModalDropdown
+                                        dropdownStyle={{
+
+                                            width:width(50),
+                                            height: height(5) * 3,
+                                            alignItems: 'stretch',
+                                        }}
+                                        textStyle={{color: '#EEEEEE', textAlign: 'right'}}
+                                        dropdownTextStyle={{fontSize: height(3), textAlign: 'right'}}
+                                        options={['All', 'District 1', 'District 2', 'District 3', 'District 4', 'District 5', 'District 6', 'District 7', 'District 8', 'District 9', 'District 10', 'District 11', 'District 12', 'Bình Tân District', 'Bình Thạnh District', 'Gò Vấp District', 'Phú Nhuận District', 'Tân Bình District', 'Tân Phú District', 'Thủ Đức District', 'Khác..']}
+                                        defaultIndex={0}
+                                        onSelect={(idx, district) => {
+                                            this.setState({district: district, draggable: true})
+                                            this.FilterUsers(null, null, district);
+                                        }}
+                                        onDropdownWillShow={() => this.setState({draggable: false})}
+                                        onDropdownWillHide={() => this.setState({draggable: true})}>
+                                        <View style={{ alignItems: 'flex-end', height: height(5)}}>
+                                            <Text style={{fontSize: height(3)}}>{this.state.district}</Text>
+                                        </View>
+                                    </ModalDropdown>
+                                </View>
+
                             </View>
-                            <View style={{flex: 1,}}/>
                         </View>
-                        <View style={{flex: 1}}/>
                     </View>
                 </SlidingUpPanel>
-
             </View>
         );
     }

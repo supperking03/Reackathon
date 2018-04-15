@@ -7,12 +7,12 @@ import {
     StyleSheet, TextInput, View, Alert, Image, Text, ActivityIndicator,
     TouchableOpacity, ImageBackground, Modal, ListView, ScrollView
 } from 'react-native';
-import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 import Spinner from 'react-native-loading-spinner-overlay';
 import SocialIcon from "react-native-elements/src/social/SocialIcon";
-
+import {height, width} from "react-native-dimension";
 import RNFetchBlob from 'react-native-fetch-blob';
+import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 const storage = firebaseApp.storage();
 const fs = RNFetchBlob.fs;
@@ -22,9 +22,9 @@ const bl = window.Blob;
 
 const Blob = RNFetchBlob.polyfill.Blob;
 
-var ImagePicker = require('react-native-image-picker');
+const ImagePicker = require('react-native-image-picker');
 
-var options = {
+const options = {
     title: 'Select Avatar',
     storageOptions: {
         skipBackup: true,
@@ -64,15 +64,12 @@ const uploadImage = (id, uri, mime = 'image/jpeg') => {
                 reject(error)
             })
     })
-}
+};
 
 
 export default class User extends Component {
     constructor(props) {
         super(props);
-
-        // const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-
         this.state = {
             isLoading: false,
             TextInputAbout: this.props.navigation.state.params.About,
@@ -88,8 +85,7 @@ export default class User extends Component {
             dataSourceDeal: [],
             numberTeam: 0,
             numberDeal: 0,
-        };
-
+        }
 
     };
 
@@ -97,32 +93,34 @@ export default class User extends Component {
         return fetch('http://71dongkhoi.esy.es/getTeamRequest.php?id=' + this.state.TextInputId)
             .then((response) => response.json())
             .then((responseJson) => {
-                console.log(responseJson + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-                this.setState({
-                    numberTeam: responseJson.length,
-                });
-                if(responseJson === "not found")
-                {
+                console.log(responseJson.length + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+                console.log(responseJson);
+                if (responseJson === 'not found') {
                     this.setState({
-                        dataSourceTeam: [],
-                        numberTeam: 0
-                    });
+                        numberTeam: 0,
+                    })
+                }
+                else {
+                    this.setState({
+                        numberTeam: responseJson.length,
+                    })
                 }
                 fetch('http://71dongkhoi.esy.es/getDealRequest.php?id=' + this.state.TextInputId)
                     .then((response) => response.json())
                     .then((responseJson) => {
                         console.log(responseJson.length + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-                        this.setState({
-                            numberDeal: responseJson.length,
-                        });
-                        if(responseJson === "not found")
-                        {
+                        console.log(responseJson);
+                        if (responseJson === 'not found') {
                             this.setState({
-                                dataSourceDeal: [],
-                                numberDeal: 0
-                            });
-                            return;
+                                numberDeal: 0,
+                            })
                         }
+                        else {
+                            this.setState({
+                                numberDeal: responseJson.length,
+                            })
+                        }
+
                     })
                     .catch((error) => {
                         console.error(error);
@@ -136,7 +134,8 @@ export default class User extends Component {
     componentWillMount() {
     }
 
-    InsertDataToServer = () => {
+
+    InsertDataToServerPressed() {
         const {TextInputAbout} = this.state;
         const {TextInputEmail} = this.state;
         const {TextInputName} = this.state;
@@ -182,51 +181,17 @@ export default class User extends Component {
             console.error(error);
         });
 
+    };
+
+    navigateBackPressed() {
+        this.props.navigation.navigate('ManHinh_Map');
+    }
+
+    pickImagePressed() {
 
     }
 
-    navigateBackPressed = () => {
-        this.props.navigation.navigate('ManHinh_Map', {
-            Phone: this.state.TextInputPhoneNumber,
-            Url: this.state.url,
-            Name: this.state.TextInputName,
-            Id: this.state.TextInputId,
-            Email: this.state.TextInputEmail,
-            About: this.state.TextInputAbout,
-        });
-    };
-
-    pickImagePressed = () => {
-        ImagePicker.showImagePicker(options, (response) => {
-            console.log('Response = ', response);
-
-            if (response.didCancel) {
-                console.log('User cancelled image picker');
-            }
-            else if (response.error) {
-                console.log('ImagePicker Error: ', response.error);
-            }
-            else if (response.customButton) {
-                console.log('User tapped custom button: ', response.customButton);
-            }
-            else {
-
-                // You can also display the image using data:
-                // let source = { uri: 'data:image/jpeg;base64,' + response.data };
-                this.setState({
-                    isLoading: true,
-                });
-                uploadImage(this.state.TextInputId, response.uri)
-                    .then(URL => this.setState({url: URL}))
-                    .then(() => {
-                        this.InsertDataToServer();
-                    })
-                    .catch(error => console.log(error))
-            }
-        });
-    };
-
-    showListRequestPressed = () => {
+    showListRequestPressed() {
         this.setState({modalVisibleTeam: true});
 
         if (this.state.numberTeam === 0) {
@@ -238,15 +203,6 @@ export default class User extends Component {
             .then((response) => response.json())
             .then((responseJson) => {
                 console.log(responseJson);
-                if(responseJson === "not found")
-                {
-                    this.setState({
-                        dataSourceTeam: [],
-                        numberTeam: 0
-                    });
-                    return;
-                }
-
                 this.setState({
                     dataSourceTeam: responseJson
                 });
@@ -254,50 +210,16 @@ export default class User extends Component {
             .catch((error) => {
                 console.error(error);
             });
-    };
+    }
 
-    hideListRequestPressed = () => {
+    hideListRequestPressed() {
         this.setState({modalVisibleTeam: false});
-    };
+    }
 
-    acceptTeamRequest = (user) => {
-        this.setState({modalVisibleTeam: true});
+    acceptTeamRequest() {
+    }
 
-        if (this.state.numberTeam === 0) {
-            this.setState({dataSourceTeam: []});
-            return;
-        }
-        fetch('http://71dongkhoi.esy.es/acceptTeamRequest.php', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                userId: user.id,
-                id: this.state.TextInputId,
-
-            })
-
-        }).then((response) => response.json())
-            .then((responseJson) => {
-                this.showListRequestPressed();
-                this.setState({
-                    isLoading: false,
-                });
-                console.log(user.id + " aaa " + this.state.TextInputId);
-
-
-// Showing response message coming from server after inserting records.
-                Alert.alert(responseJson);
-
-            }).catch((error) => {
-            console.error(error);
-
-        })
-    };
-
-    denyTeamRequest = (user) => {
+    denyTeamRequest(user) {
         if (this.state.numberTeam === 1) {
             this.setState({dataSourceTeam: [], numberTeam: 0});
             // this.setState({
@@ -318,7 +240,6 @@ export default class User extends Component {
 
         }).then((response) => response.json())
             .then((responseJson) => {
-                this.showListRequestPressed();
                 this.setState({
                     isLoading: false,
                 });
@@ -332,8 +253,7 @@ export default class User extends Component {
             console.error(error);
 
         })
-    };
-
+    }
 
     showListDealRequestPressed() {
         this.setState({modalVisibleDeal: true});
@@ -347,14 +267,6 @@ export default class User extends Component {
             .then((response) => response.json())
             .then((responseJson) => {
                 console.log(responseJson);
-                if(responseJson === "not found")
-                {
-                    this.setState({
-                        dataSourceDeal: [],
-                        numberDeal: 0
-                    });
-                    return;
-                }
                 this.setState({
                     dataSourceDeal: responseJson
                 });
@@ -368,46 +280,12 @@ export default class User extends Component {
         this.setState({modalVisibleDeal: false});
     }
 
-    acceptDealRequest =(user) => {
-        this.setState({modalVisibleDeal: true});
-
-        if (this.state.numberDeal === 0) {
-            this.setState({dataSourceDeal: []});
-            return;
-        }
-        fetch('http://71dongkhoi.esy.es/acceptTeamRequest.php', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                userId: user.id,
-                id: this.state.TextInputId,
-
-            })
-
-        }).then((response) => response.json())
-            .then((responseJson) => {
-                this.showListRequestPressed();
-                this.setState({
-                    isLoading: false,
-                });
-                console.log(user.id + " aaa " + this.state.TextInputId);
-
-
-// Showing response message coming from server after inserting records.
-                Alert.alert(responseJson);
-
-            }).catch((error) => {
-            console.error(error);
-
-        });
+    acceptDealRequest() {
     }
 
-    denyDealRequest = (user) =>{
+    denyDealRequest(user) {
         if (this.state.numberDeal === 1) {
-            this.setState({dataSourceDeal: [], numberDeal: 0});
+            this.setState({dataSourceDeal: [], numberTeam: 0});
             // this.setState({
             //     modalVisibleTeam:false
             // })
@@ -441,6 +319,7 @@ export default class User extends Component {
         })
     }
 
+
     render() {
         return (
             <KeyboardAwareScrollView>
@@ -458,24 +337,14 @@ export default class User extends Component {
                             <View style={{borderBottomWidth: 1, borderColor: '#bdc3c7', marginBottom: 3}}>
                                 <TouchableOpacity
                                     style={{alignSelf: 'center'}}
-                                    onPress={this.hideListRequestPressed}>
+                                    onPress={this.hideListRequestPressed.bind(this)}>
                                     <Icon size={35} name="ios-arrow-down-outline" color="grey"/>
                                 </TouchableOpacity>
                             </View>
-                            {
-                                this.state.numberTeam === 0 ?
-                                    <View style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}>
-                                        <Text style={{fontSize: 15, alignSelf: 'center'}}>No request</Text>
-                                    </View> :
-                                    <ListView
-                                        dataSource={new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}).cloneWithRows(this.state.dataSourceTeam)}
-                                        renderRow={this.renderRow}/>
-                            }
+
+                            <ListView
+                                dataSource={new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}).cloneWithRows(this.state.dataSourceTeam)}
+                                renderRow={this.renderRow.bind(this)}/>
 
                         </View>
                     </Modal>
@@ -510,7 +379,7 @@ export default class User extends Component {
                                     <EleIcon size={28} name="keyboard-backspace" color="white"/>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity onPress={this.InsertDataToServer.bind(this)}
+                                <TouchableOpacity onPress={this.InsertDataToServerPressed.bind(this)}
                                                   style={styles.NavigateTouchable}>
                                     <EleIcon size={28} name="done" color="white"/>
 
@@ -655,15 +524,13 @@ export default class User extends Component {
                                                             marginLeft: -8
                                                         }}>
 
-                                                            <Text
-                                                                style={{color: 'white'}}>{this.state.numberTeam}</Text>
+                                                            <Text style={{color: 'white'}}>{this.state.numberTeam}</Text>
 
                                                         </View>
                                                 }
                                             </TouchableOpacity>
                                         </View>
                                     </View>
-
                                 </View>
                             </View>
                         </ImageBackground>
@@ -728,180 +595,178 @@ export default class User extends Component {
                                 />
                             </View>
                         </View>
-
                     </View>
                 </View>
             </KeyboardAwareScrollView>
-    );
+        );
     }
 
 
     renderRow(user) {
         return (
-        <TouchableOpacity style={styles.TouchableRequestItems}>
+            <TouchableOpacity style={styles.TouchableRequestItems}>
 
-        <Image style={{width: 70, height: 70, borderRadius: 50}}
-        source={{uri: "http://graph.facebook.com/" + user.id + "/picture?type=large"}}/>
-        <View style={{flex: 1, justifyContent: 'space-between', flexDirection: 'row'}}>
-        <View style={{flex: 1}}>
-        <Text style={{marginLeft: 10, fontWeight: 'bold', fontSize: 18}}>{user.name}</Text>
-        <View style={{flexDirection: 'row', alignItems: 'center', marginLeft: 30,}}>
-        <TouchableOpacity style={styles.TouchableItemViewProfile}>
-        <Text style={{fontWeight: 'bold', color: '#16a085'}}>View profile</Text>
-        </TouchableOpacity>
-        </View>
+                <Image style={{width: 70, height: 70, borderRadius: 50}}
+                       source={{uri: "http://graph.facebook.com/" + user.id + "/picture?type=large"}}/>
+                <View style={{flex: 1, justifyContent: 'space-between', flexDirection: 'row'}}>
+                    <View style={{flex: 1}}>
+                        <Text style={{marginLeft: 10, fontWeight: 'bold', fontSize: 18}}>{user.name}</Text>
+                        <View style={{flexDirection: 'row', alignItems: 'center', marginLeft: 30,}}>
+                            <TouchableOpacity style={styles.TouchableItemViewProfile}>
+                                <Text style={{fontWeight: 'bold', color: '#16a085'}}>View profile</Text>
+                            </TouchableOpacity>
+                        </View>
 
-        </View>
-        <TouchableOpacity style={{justifyContent: 'center'}}
-        onPress={() => {
-            this.acceptTeamRequest(user)
-        }}>
-        <Icon size={30} name="md-checkmark-circle" color="#27ae60"/>
-        </TouchableOpacity>
+                    </View>
+                    <TouchableOpacity style={{justifyContent: 'center'}}
+                                      onPress={this.acceptTeamRequest.bind(this)}>
+                        <Icon size={30} name="md-checkmark-circle" color="#27ae60"/>
+                    </TouchableOpacity>
 
-        <TouchableOpacity style={{justifyContent: 'center', marginLeft: 10, marginRight: 5}}
-        onPress={() => {
-            this.denyTeamRequest(user);
-        }}>
-        <Icon size={30} name="md-remove-circle" color="#e74c3c"/>
-        </TouchableOpacity>
-        </View>
-        </TouchableOpacity>
+                    <TouchableOpacity style={{justifyContent: 'center', marginLeft: 10, marginRight: 5}}
+                                      onPress={() => {
+                                          this.denyTeamRequest(user)
+                                      }}>
+                        <Icon size={30} name="md-remove-circle" color="#e74c3c"/>
+                    </TouchableOpacity>
+                </View>
+            </TouchableOpacity>
 
         )
     }
+
+
     renderRowDeal(user) {
         return (
-        <TouchableOpacity style={styles.TouchableRequestItems}>
+            <TouchableOpacity style={styles.TouchableRequestItems}>
 
-        <Image style={{width: 70, height: 70, borderRadius: 50}}
-        source={{uri: "http://graph.facebook.com/" + user.id + "/picture?type=large"}}/>
-        <View style={{flex: 1, justifyContent: 'space-between', flexDirection: 'row'}}>
-        <View style={{flex: 1}}>
-        <Text style={{marginLeft: 10, fontWeight: 'bold', fontSize: 18}}>{user.name}</Text>
-        <View style={{flexDirection: 'row', alignItems: 'center', marginLeft: 30,}}>
-        <TouchableOpacity style={styles.TouchableItemViewProfile}>
-        <Text style={{fontWeight: 'bold', color: '#16a085'}}>View profile</Text>
-        </TouchableOpacity>
-        </View>
+                <Image style={{width: 70, height: 70, borderRadius: 50}}
+                       source={{uri: "http://graph.facebook.com/" + user.id + "/picture?type=large"}}/>
+                <View style={{flex: 1, justifyContent: 'space-between', flexDirection: 'row'}}>
+                    <View style={{flex: 1}}>
+                        <Text style={{marginLeft: 10, fontWeight: 'bold', fontSize: 18}}>{user.name}</Text>
+                        <View style={{flexDirection: 'row', alignItems: 'center', marginLeft: 30,}}>
+                            <TouchableOpacity style={styles.TouchableItemViewProfile}>
+                                <Text style={{fontWeight: 'bold', color: '#16a085'}}>View profile</Text>
+                            </TouchableOpacity>
+                        </View>
 
-        </View>
-        <TouchableOpacity style={{justifyContent: 'center'}}
-        onPress={()=>{this.acceptDealRequest(user)}}>
-        <Icon size={30} name="md-checkmark-circle" color="#27ae60"/>
-        </TouchableOpacity>
+                    </View>
+                    <TouchableOpacity style={{justifyContent: 'center'}}
+                                      onPress={this.acceptDealRequest().bind(this)}>
+                        <Icon size={30} name="md-checkmark-circle" color="#27ae60"/>
+                    </TouchableOpacity>
 
-        <TouchableOpacity style={{justifyContent: 'center', marginLeft: 10, marginRight: 5}}
-        onPress={() => {
-            this.denyDealRequest(user);
-        }}>
-        <Icon size={30} name="md-remove-circle" color="#e74c3c"/>
-        </TouchableOpacity>
-        </View>
-        </TouchableOpacity>
+                    <TouchableOpacity style={{justifyContent: 'center', marginLeft: 10, marginRight: 5}}
+                                      onPress={() => {
+                                          this.denyDealRequest(user)
+                                      }}>
+                        <Icon size={30} name="md-remove-circle" color="#e74c3c"/>
+                    </TouchableOpacity>
+                </View>
+            </TouchableOpacity>
 
         )
     }
 
+}
 
-    }
-
-    const
+const
     styles = StyleSheet.create({
         NavigateTouchable: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center'
+        },
         NavigateView: {
-        flexDirection: 'row',
-        height: 50,
-        width: '100%',
-        justifyContent: 'space-between',
-        backgroundColor: 'rgba(0,0,0,0.65)',
-        paddingRight: 20,
-        paddingLeft: 20
-    },
+            flexDirection: 'row',
+            height: 50,
+            width: '100%',
+            justifyContent: 'space-between',
+            backgroundColor: 'rgba(0,0,0,0.65)',
+            paddingRight: 20,
+            paddingLeft: 20
+        },
 
         ImageTouchable: {
-        borderRadius: 85,
-        width: 150, height: 150,
-        backgroundColor: 'transparent',
-        borderWidth: 2,
-        borderColor: '#16a085',
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
+            borderRadius: 85,
+            width: 150, height: 150,
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            borderColor: '#16a085',
+            alignItems: 'center',
+            justifyContent: 'center'
+        },
 
         ImageBackground: {
-        height: 300,
-        width: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
+            height: 300,
+            width: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
         ImageStyle: {
-        borderRadius: 100,
-        width: 147.5,
-        height: 147.5,
-    },
+            borderRadius: 100,
+            width: 147.5,
+            height: 147.5,
+        },
 
         ImageContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            flex: 1,
 
-    },
+        },
         telIcon: {
-        //marginBottom:10,
-        color: 'grey',
-        fontSize: 30,
-    },
+            //marginBottom:10,
+            color: 'grey',
+            fontSize: 30,
+        },
         TextInputStyleClass: {
-        backgroundColor: 'white',
-        marginLeft: 20,
-        textAlign: 'left',
-        width: '100%',
-        marginTop: 7,
-        marginBottom: 7,
-        height: 40,
-        borderBottomWidth: 1,
-        borderColor: '#ecf0f1'
-    },
+            backgroundColor: 'white',
+            marginLeft: 20,
+            textAlign: 'left',
+            width: '100%',
+            marginTop: 7,
+            marginBottom: 7,
+            height: 40,
+            borderBottomWidth: 1,
+            borderColor: '#ecf0f1'
+        },
 
         TextInputAboutStyle: {
-        height: 80,
-        width: '100%',
-        marginLeft: 20,
-        textAlignVertical: 'top',
-        borderBottomWidth: 1,
-        borderColor: '#ecf0f1'
-    },
+            height: 80,
+            width: '100%',
+            marginLeft: 20,
+            textAlignVertical: 'top',
+            borderBottomWidth: 1,
+            borderColor: '#ecf0f1'
+        },
 
         TouchableRequestItems: {
-        width: '100%',
-        height: 100,
-        flexDirection: 'row',
-        padding: 20,
-        borderBottomWidth: 2,
-        borderColor: '#bdc3c7'
-    },
+            width: '100%',
+            height: 100,
+            flexDirection: 'row',
+            padding: 20,
+            borderBottomWidth: 2,
+            borderColor: '#bdc3c7'
+        },
 
         TouchableItemViewProfile: {
-        borderRadius: 50,
-        borderWidth: 2,
-        borderColor: '#16a085',
-        margin: 3,
-        padding: 2,
-        width: 150,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
+            borderRadius: 50,
+            borderWidth: 2,
+            borderColor: '#16a085',
+            margin: 3,
+            padding: 2,
+            width: 150,
+            alignItems: 'center',
+            justifyContent: 'center'
+        },
         Image: {
-        borderRadius: 100,
-        width: 147.5,
-        height: 147.5,
+            borderRadius: 100,
+            width: 147.5,
+            height: 147.5,
 
-    }
+        }
 
 
     });

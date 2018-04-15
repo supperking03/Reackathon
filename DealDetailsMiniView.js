@@ -10,7 +10,7 @@ import {
 import {width, height, totalSize} from 'react-native-dimension';
 
 import {Icon} from 'react-native-elements'
-
+import call from 'react-native-phone-call'
 
 
 export default class DealDetailsMiniView extends Component {
@@ -27,7 +27,7 @@ export default class DealDetailsMiniView extends Component {
                 <View style={{flex:2, justifyContent:'center'}}>
                     <View style={{flexDirection: 'row', marginTop: 10}}>
                         <View style={{flex: 1}}>
-                            <View style={{alignItems: 'center'}}>
+                            <View style={{alignItems: 'center',width:100,height:100}}>
                                 <Image source={{uri: this.props.avatar}}
                                        style={{width: 50, height: 50, margin: 15}}/>
                                 <Text style={{fontSize: 15, color: '#2c3e50', fontWeight: 'bold',}}>
@@ -62,13 +62,23 @@ export default class DealDetailsMiniView extends Component {
                     </View>
                 </View>
                 <View style={{flexDirection: 'row', flex: 1, marginTop: 10, justifyContent:'center'}}>
-                    <TouchableOpacity style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                    <TouchableOpacity style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} onPress={()=>{call({number: this.props.phone,prompt: false}).catch(console.error)}}>
                         <Icon size={28} name="call" color="#16a085"/>
                         <Text style={{color: '#16a085', flex: 1}}>Call</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                    <TouchableOpacity style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}
+                        onPress={()=>{
+                            this.props.This.props.navigation.navigate('ManHinh_ProfileView', {
+                                Phone: this.props.phone,
+                                Url: this.props.avatar,
+                                Name: this.props.name,
+                                Id: this.props.id,
+                                Email: this.props.email,
+                                About: this.props.about,
+                            });
+                        }}>
                         <Icon size={28} name="person-add" color="#16a085"/>
-                        <Text style={{color: '#16a085', flex: 1}}>Join Team</Text>
+                        <Text style={{color: '#16a085', flex: 1}}>More Info</Text>
                     </TouchableOpacity>
                 </View>
             </View>
