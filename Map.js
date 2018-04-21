@@ -22,7 +22,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import DealDetailsMiniView from "./DealDetailsMiniView";
 import {Icon} from "react-native-elements";
-import DealMarker from "./DealMarker";
+import DealMarker from "./Components/DealMarker";
 
 
 const ASPECT_RATIO = width(100) / height(100)
@@ -146,9 +146,9 @@ export default class Map extends Component {
             filter: [],
             visible: false,
             draggable: true,
-            type: "All",
-            age: "All",
-            district: "All",
+            type: 'Tất cả',
+            age: 'Tất cả',
+            district: 'Tất cả',
             myCoordinate:
                 {
                     latitude: 0,
@@ -197,15 +197,14 @@ export default class Map extends Component {
         this.LoadData();
 
 
-        this.onLoad=this.onLoad.bind(this);
     }
 
     FilterUsers = (type, age, position) => {
         var _result = [];
         var _type = (type == null) ? this.state.type : type;
-        if (_type != "All") {
+        if (_type != 'Tất cả') {
             this.state.users.map(user => {
-                if (user.type == _type || user.type == "All") {
+                if (user.type == _type || user.type == 'Tất cả') {
 
                     _result.push(user);
                 }
@@ -216,18 +215,18 @@ export default class Map extends Component {
         }
         var _result2 = _result.slice();
         var _age = (age == null) ? this.state.age : age;
-        if (_age != "All") {
+        if (_age != 'Tất cả') {
             _result.map(user => {
-                if (user.age != _age && user.age != "All") {
+                if (user.age != _age && user.age != 'Tất cả') {
                     _result2.pop(user);
                 }
             })
         }
         var _result3 = _result2.slice();
         var _position = (position == null) ? this.state.district : position;
-        if (_position != "All") {
+        if (_position != 'Tất cả') {
             _result2.map(user => {
-                if (user.position != _position && user.position != "All") {
+                if (user.position != _position && user.position != 'Tất cả') {
                     _result3.pop(user);
                 }
             })
@@ -304,9 +303,6 @@ export default class Map extends Component {
     componentDidMount() {
     }
 
-    onLoad(){
-        this.forceUpdate();
-    }
 
     render() {
         return (
@@ -347,8 +343,36 @@ export default class Map extends Component {
                         {
                             this.state.filter.map(user => (
                                     <DealMarker
+                                        key={user.id}
                                         deal={user}
-                                        onLoad={this.onLoad}
+                                        onPressed={() => {
+
+                                            this.setState({visibleMap: true});
+                                            this.setState({
+                                                currentUser: {
+                                                    id: user.id,
+                                                    name: user.name,
+                                                    type: user.type,
+                                                    date: user.date,
+                                                    time1: user.time1,
+                                                    time2: user.time2,
+                                                    url : user.url,
+                                                    position: user.position,
+                                                    phone : user.phone,
+                                                    email : user.email,
+                                                    about: user.about,
+                                                },
+                                            });
+
+                                            axios.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + user.latitude + ',' + user.longitude + '&key=AIzaSyC-H415RwIwooot2IeOqn9SsX1jEof8QxA') // be sure your api key is correct and has access to the geocode api
+                                                .then(response => {
+                                                    var address = response.data.results[0].formatted_address.toString().split(/,/);
+
+                                                    this.setState({place: (address[0] + "," + address[1] + "," + address[2])}); // access from response.data.results[0].formatted_address
+                                                }).catch((error) => { // catch is called after then
+                                                //alert("Eeeeeee");
+                                            });
+                                        }}
                                     />
                                 )
                             )
@@ -405,7 +429,7 @@ export default class Map extends Component {
                         </View>
                         <View style={{flex: 5, justifyContent: 'center'}}>
                             <TextInput editable={false} maxLength={100} multiline={false}
-                                       placeholder={"Search location"} spellcheck={false}
+                                       placeholder={""} spellcheck={false}
                                        placeholderTextColor={'#9E9E9E'} underlineColorAndroid={'transparent'}
                                        autoFocus={false}>
                                 {this.state.place}
@@ -552,14 +576,14 @@ export default class Map extends Component {
                         </ActionButton.Item>
                         <ActionButton.Item
                             offsetX={width(5)}
-                            title={"Filter"}
+                            title={"Lọc"}
                             spaceBetween={5}
                             onPress={() => this.setState({visible: true})}>
                             <FontAwesome name="sliders" color="#4CAF50" size={width(5.2)}/>
                         </ActionButton.Item>
                         <ActionButton.Item
                             offsetX={width(5)}
-                            title={"Make a deal"}
+                            title={"Tạo kèo"}
                             spaceBetween={5} onPress={() => {
                             this.props.navigation.navigate('ManHinh_Deal', {
                                 Id: this.props.navigation.state.params.Id,
@@ -625,7 +649,7 @@ export default class Map extends Component {
                                     marginTop: 5,
                                     justifyContent: 'center',
                                     alignItems: 'center',
-                                    backgroundColor: (this.state.type == 'All') ? '#c0392b' : '#27ae60'
+                                    backgroundColor: (this.state.type == 'Tất cả') ? '#c0392b' : '#27ae60'
                                 }}>
                                     <Text style={{
                                         margin: 5,
@@ -640,7 +664,7 @@ export default class Map extends Component {
                                         dropdownStyle={{width: width(50), height: height(5) * 3, alignItems: 'stretch'}}
                                         textStyle={{color: '#EEEEEE', textAlign: 'right'}}
                                         dropdownTextStyle={{fontSize: height(3), textAlign: 'right'}}
-                                        options={['All', '5', '10']}
+                                        options={['Tất cả', '5', '10']}
                                         defaultIndex={0}
                                         onSelect={(idx, type) => {
                                             this.setState({type: type, draggable: true});
@@ -668,7 +692,7 @@ export default class Map extends Component {
                                     marginTop: 5,
                                     justifyContent: 'center',
                                     alignItems: 'center',
-                                    backgroundColor: (this.state.age == 'All') ? '#c0392b' : '#27ae60'
+                                    backgroundColor: (this.state.age == 'Tất cả') ? '#c0392b' : '#27ae60'
                                 }}>
                                     <Text style={{
                                         margin: 5,
@@ -683,7 +707,7 @@ export default class Map extends Component {
                                         dropdownStyle={{width: width(50), height: height(5) * 3, alignItems: 'stretch'}}
                                         textStyle={{color: '#EEEEEE', textAlign: 'right'}}
                                         dropdownTextStyle={{fontSize: height(3), textAlign: 'right'}}
-                                        options={['All', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']}
+                                        options={['Tất cả', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']}
                                         defaultIndex={0}
                                         onSelect={(idx, age) => {
                                             this.setState({age: age, draggable: true});
@@ -709,7 +733,7 @@ export default class Map extends Component {
                                     marginTop: 5,
                                     justifyContent: 'center',
                                     alignItems: 'center',
-                                    backgroundColor: (this.state.district == 'All') ? '#c0392b' : '#27ae60'
+                                    backgroundColor: (this.state.district == 'Tất cả') ? '#c0392b' : '#27ae60'
                                 }}>
                                     <Text style={{
                                         margin: 5,
@@ -728,7 +752,7 @@ export default class Map extends Component {
                                         }}
                                         textStyle={{color: '#EEEEEE', textAlign: 'right'}}
                                         dropdownTextStyle={{fontSize: height(3), textAlign: 'right'}}
-                                        options={['All', 'District 1', 'District 2', 'District 3', 'District 4', 'District 5', 'District 6', 'District 7', 'District 8', 'District 9', 'District 10', 'District 11', 'District 12', 'Bình Tân District', 'Bình Thạnh District', 'Gò Vấp District', 'Phú Nhuận District', 'Tân Bình District', 'Tân Phú District', 'Thủ Đức District', 'Khác..']}
+                                        options={['Tất cả', 'Quận 1', 'Quận 2', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận 6', 'Quận 7', 'Quận 8', 'Quận 9', 'Quận 10', 'Quận 11', 'Quận 12', 'Quận Bình Tân', 'Quận Bình Thạnh', 'Quận Gò Vấp', 'Quận Phú Nhuận', 'Quận Tân Bình', 'Quận Tân Phú', 'Quận Thủ Đức', 'Khác..']}
                                         defaultIndex={0}
                                         onSelect={(idx, district) => {
                                             this.setState({district: district, draggable: true})
