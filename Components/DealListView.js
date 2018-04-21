@@ -303,7 +303,6 @@ export default class DealsListView extends Component {
                     renderContent={this._renderContent.bind(this)}
                     initiallyActiveSection={0}
                 />
-                <Image source={require('../assets/greenMarker.png')} style={{marginTop : 10000}}/>
             </View>
         )
     }

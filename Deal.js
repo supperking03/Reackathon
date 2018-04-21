@@ -17,6 +17,8 @@ import {Icon} from 'react-native-elements'
 import * as axios from "axios/index";
 import StepIndicator from 'react-native-step-indicator';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import { ProgressDialog } from 'react-native-simple-dialogs';
+import { ConfirmDialog } from 'react-native-simple-dialogs';
 
 const ASPECT_RATIO = width(100) / height(100);
 const LATITUDE = 10.8105831;
@@ -134,9 +136,9 @@ export default class Deal extends Component {
 
         this.state = {
             id: this.props.navigation.state.params.Id,
-            type: "All",
-            age: "All",
-            district: "All",
+            type: 'Tất cả',
+            age: 'Tất cả',
+            district: 'Tất cả',
             date: new Date(),
             timeStart: new Date(0, 0, 0, new Date().getHours(), new Date().getMinutes(), 0, 0),
             timeEnd: new Date(0, 0, 0, new Date().getHours() + 1, new Date().getMinutes(), 0, 0),
@@ -153,7 +155,11 @@ export default class Deal extends Component {
                     longitudeDelta: LONGITUDE_DELTA,
                 },
             place: "",
-            statusBarHeight: 0,
+            statusBarHeight: 0, 
+            dealType:'Thương lượng',
+            alert : "Thành công",
+            alertVisible: false,
+            progressVisible : false,
 
         }
         ;
@@ -162,6 +168,7 @@ export default class Deal extends Component {
     }
 
     BacktoMap = ()=>{
+        this.setState({alertVisible:false});
         this.props.navigation.navigate('ManHinh_Map', {
             Id: this.props.navigation.state.params.Id,
             Url: this.props.navigation.state.params.Url,
@@ -178,14 +185,14 @@ export default class Deal extends Component {
         const TextInputTime2 = this.state.timeEnd.getHours() + ":" + this.state.timeEnd.getMinutes() + ((this.state.timeStart.getHours() < 1) ? " AM" : " PM")
         const TextInputPosition = this.state.district;
         const TextInputLat = this.state.latitude;
-        const TextInputLong = this.state.longitude;
-
+        const TextInputLong = this.state.longitude; 
+        const dealType = this.state.dealType;
         //alert(TextInputTime1 + "," + TextInputTime2 + "," +TextInputDate);
         // this.setState({
         //     isLoading: true,
         // });
 
-
+        this.setState({progressVisible : true});
         fetch('http://71dongkhoi.esy.es/submit_deal_info.php', {
             method: 'POST',
             headers: {
@@ -211,18 +218,15 @@ export default class Deal extends Component {
                 latitude: TextInputLat,
 
                 longitude: TextInputLong,
-
+                
+                dealType : dealType,
             })
 
         }).then((response) => response.json())
             .then((responseJson) => {
-                // this.setState({
-                //     isLoading: false,
-                // });
-                // Showing response message coming from server after inserting records.
-                alert(responseJson);
-                this.BacktoMap();
-
+                if(responseJson === 'Duplicated deal !')
+                    this.setState({alert: "Bạn đã có một bài đăng rồi"})
+                this.setState({progressVisible:false , alertVisible : true});
             }).catch((error) => {
             console.error(error);
         });
@@ -243,10 +247,25 @@ export default class Deal extends Component {
                         stepCount={3}
                         customStyles={customStyles}
                         currentPosition={this.state.currentPosition}
-                        labels={["Update information", "Set up revenue", "Post"]}
+                        labels={["Thêm thông tin kèo", "Tùy chọn vị trí", "Đăng tin"]}
                     />
                 </View>
                 {this.renderStep()}
+                <ConfirmDialog
+                    title="Đăng bài"
+                    message={this.state.alert}
+                    visible={this.state.alertVisible}
+                    onTouchOutside={() => this.setState({alertVisible: false})}
+                    positiveButton={{
+                        title: "OK",
+                        onPress: () => {this.BacktoMap()},
+                    }}
+                />
+                <ProgressDialog
+                    visible={this.state.progressVisible}
+                    title="Đăng bài"
+                    message="Đang đăng..."
+                />
             </View>
         );
     }
@@ -262,7 +281,7 @@ export default class Deal extends Component {
                                 fontSize: height(2),
                                 fontWeight: 'bold',
                                 marginBottom: height(1),
-                            }}>Team's type :</Text>
+                            }}>Loại đội bóng :</Text>
                         <View style={{alignItems: 'center'}}>
                             <ModalDropdown
                                 dropdownStyle={{
@@ -272,7 +291,7 @@ export default class Deal extends Component {
                                 }}
                                 textStyle={{color: 'black'}}
                                 dropdownTextStyle={{fontSize: height(3), textAlign: 'left', marginLeft: 20,}}
-                                options={['All', '5', '10']}
+                                options={['Tất cả', '5', '10']}
                                 defaultIndex={0}
                                 onSelect={(idx, type) => {
                                     this.setState({type: type})
@@ -298,7 +317,7 @@ export default class Deal extends Component {
                                 fontSize: height(2),
                                 fontWeight: 'bold',
                                 marginBottom: height(1),
-                            }}>Age :</Text>
+                            }}>Độ tuổi :</Text>
                         <View style={{alignItems: 'center'}}>
                             <ModalDropdown
                                 dropdownStyle={{
@@ -308,7 +327,7 @@ export default class Deal extends Component {
                                 }}
                                 textStyle={{color: 'black'}}
                                 dropdownTextStyle={{fontSize: height(3), textAlign: 'left', marginLeft: 20,}}
-                                options={['All', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']}
+                                options={['Tất cả', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']}
                                 defaultIndex={0}
                                 onSelect={(idx, age) => {
                                     this.setState({age: age})
@@ -334,7 +353,7 @@ export default class Deal extends Component {
                                 fontSize: height(2),
                                 fontWeight: 'bold',
                                 marginBottom: height(1),
-                            }}>Revenue :</Text>
+                            }}>Khu vực đá :</Text>
                         <View style={{alignItems: 'center'}}>
                             <ModalDropdown
                                 dropdownStyle={{
@@ -344,7 +363,7 @@ export default class Deal extends Component {
                                 }}
                                 textStyle={{color: 'black'}}
                                 dropdownTextStyle={{fontSize: height(3), textAlign: 'left', marginLeft: 20}}
-                                options={['All', 'District 1', 'District 2', 'District 3', 'District 4', 'District 5', 'District 6', 'District 7', 'District 8', 'District 9', 'District 10', 'District 11', 'District 12', 'Bình Tân District', 'Bình Thạnh District', 'Gò Vấp District', 'Phú Nhuận District', 'Tân Bình District', 'Tân Phú District', 'Thủ Đức District', 'Khác..']}
+                                options={['Tất cả', 'Quận 1', 'Quận 2', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận 6', 'Quận 7', 'Quận 8', 'Quận 9', 'Quận 10', 'Quận 11', 'Quận 12', 'Quận Bình Tân', 'Quận Bình Thạnh', 'Quận Gò Vấp', 'Quận Phú Nhuận', 'Quận Tân Bình', 'Quận Tân Phú', 'Quận Thủ Đức', 'Khác..']}
                                 defaultIndex={0}
                                 onSelect={(idx, district) => {
                                     this.setState({district: district})
@@ -372,7 +391,7 @@ export default class Deal extends Component {
                                 fontSize: height(2),
                                 fontWeight: 'bold',
                                 marginBottom: height(1),
-                            }}>Date :</Text>
+                            }}>Ngày :</Text>
                         <View style={{alignItems: 'center'}}>
                             <DatePicker
                                 style={{
@@ -411,7 +430,8 @@ export default class Deal extends Component {
 
                                 }}
                                 onDateChange={(date) => {
-                                    this.setState({date: date});
+                                    var res = date.split(/-/);
+                                    this.setState({date: new Date(res[2],res[1],res[0],0,0,0,0)});
 
                                 }}
                             />
@@ -425,7 +445,7 @@ export default class Deal extends Component {
                                 fontSize: height(2),
                                 fontWeight: 'bold',
                                 marginBottom: height(1),
-                            }}>Time :</Text>
+                            }}>Thời gian :</Text>
                         <View style={{alignItems: 'center'}}>
                             <View style={{flexDirection: 'row', width: width(80) - 2}}>
                                 <View style={{flexDirection: 'row', width: width(40) - 1}}>
@@ -433,7 +453,7 @@ export default class Deal extends Component {
                                         style={{
                                             width: width(10),
                                             fontSize: height(2),
-                                        }}>From:</Text>
+                                        }}>Từ:</Text>
                                     <DatePicker
                                         style={{
                                             backgroundColor: 'rgba(220,237,200 ,0.9)',
@@ -484,7 +504,7 @@ export default class Deal extends Component {
                                         style={{
                                             width: width(7),
                                             fontSize: height(2),
-                                        }}>To:</Text>
+                                        }}>Đến:</Text>
                                     <DatePicker
                                         style={{
                                             backgroundColor: 'rgba(220,237,200 ,0.9)',
@@ -556,7 +576,7 @@ export default class Deal extends Component {
                                         marginRight: width(15) - 40,
                                         fontWeight: 'bold',
                                         fontSize: 18
-                                    }}>Back</Text>
+                                    }}>Trở về</Text>
                                 </View>
                             </TouchableOpacity>
                             <TouchableOpacity
@@ -576,7 +596,7 @@ export default class Deal extends Component {
                                         fontWeight: 'bold',
                                         marginLeft: width(15) - 40,
                                         fontSize: 18
-                                    }}>Post</Text>
+                                    }}>Tiếp</Text>
                                     <MaterialCommunityIcons size={22} name="chevron-right" color="white"/>
                                 </View>
                             </TouchableOpacity>
@@ -630,7 +650,7 @@ export default class Deal extends Component {
                             <View style={{flex: 1}}>
                                 <View style={{flexDirection: 'row', alignItems: 'center',}}>
                                     <Text style={{fontSize: 17, color: '#2c3e50', marginTop: 10}}>
-                                        {"My location : " + this.state.place}</Text>
+                                        {"Vị trí của bạn : " + this.state.place}</Text>
                                 </View>
                             </View>
                         </View>
@@ -695,7 +715,7 @@ export default class Deal extends Component {
                                         marginRight: width(15) - 40,
                                         fontWeight: 'bold',
                                         fontSize: 18
-                                    }}>Back</Text>
+                                    }}>Quay lại</Text>
                                 </View>
                             </TouchableOpacity>
                             <TouchableOpacity
@@ -715,7 +735,7 @@ export default class Deal extends Component {
                                         fontWeight: 'bold',
                                         marginLeft: width(15) - 40,
                                         fontSize: 18
-                                    }}>Next</Text>
+                                    }}>Tiếp</Text>
                                     <MaterialCommunityIcons size={22} name="chevron-right" color="white"/>
                                 </View>
                             </TouchableOpacity>
@@ -735,30 +755,66 @@ export default class Deal extends Component {
                         marginTop: height(10),
                         alignItems: 'center'
                     }}>
-                        <View style={{position: 'absolute', justifyContent: 'center', alignItems: 'center'}}>
+                        <View style={{position: 'absolute',width : width(70)}}>
                             <View style={{flex: 3}}>
                                 <Text style={{fontSize: 20, color: '#2c3e50', fontWeight: 'bold', marginTop: 20,}}>
-                                    {(this.state.type === "All") ? "Finding team's type : All":"Finding team's type :" + this.state.type}</Text>
+                                    {"Loại đội bóng : " + this.state.type}</Text>
                                 <Text style={{fontSize: 20, color: '#2c3e50', marginTop: 20,}}>
-                                    {"Age : " + this.state.age}</Text>
+                                    {"Độ tuổi : " + this.state.age}</Text>
                                 <View style={{flexDirection: 'column'}}>
                                     <Text style={{fontSize: 20, color: '#2c3e50', marginTop: 20,}}>
-                                        {"Date :  " + this.state.date.getDate() + "/" + this.state.date.getMonth() + "/" + this.state.date.getFullYear()}</Text>
+                                        {"Ngày :  " + this.state.date.getDate() + "/" + this.state.date.getMonth() + "/" + this.state.date.getFullYear()}</Text>
                                     <Text style={{fontSize: 20, color: '#2c3e50', marginTop: 10, marginLeft: 20}}>
-                                        {" at : " + this.state.timeStart.getHours() + ":" + this.state.timeStart.getMinutes() + ((this.state.timeStart.getHours() < 12) ? " AM" : " PM") + " - " + this.state.timeEnd.getHours() + ":" + this.state.timeEnd.getMinutes() + ((this.state.timeStart.getHours() < 1) ? " AM" : " PM")}</Text>
+                                        {" lúc : " + this.state.timeStart.getHours() + ":" + this.state.timeStart.getMinutes() + ((this.state.timeStart.getHours() < 12) ? " AM" : " PM") + " - " + this.state.timeEnd.getHours() + ":" + this.state.timeEnd.getMinutes() + ((this.state.timeStart.getHours() < 1) ? " AM" : " PM")}</Text>
                                 </View>
                                 <View style={{flexDirection: 'row', alignItems: 'center',}}>
                                     <Text style={{fontSize: 20, color: '#2c3e50', marginTop: 20,}}>
-                                        {"Revenue : " + this.state.district}</Text>
+                                        {"Khu vực đá : " + this.state.district}</Text>
                                 </View>
                                 <View style={{flexDirection: 'row', alignItems: 'center',}}>
                                     <Text style={{fontSize: 20, color: '#2c3e50', marginTop: 20,}}>
-                                        {"Post Location: "}</Text>
+                                        {"Vị trí gặp : "}</Text>
                                 </View>
                                 <View style={{flexDirection: 'row', alignItems: 'center',}}>
                                     <Text style={{fontSize: 20, color: '#2c3e50', marginTop: 10, marginLeft: 20}}>
                                         {"  " + this.state.place}</Text>
                                 </View>
+                            </View>
+                            <View style={{flex: 1}}>
+                                <Text
+                                    style={{
+                                        fontSize: height(3),
+                                        fontWeight: 'bold',
+                                        marginBottom: height(1),
+                                    }}>Loại kèo :</Text>
+                                <View style={{alignItems: 'center'}}>
+                                    <ModalDropdown
+                                        dropdownStyle={{
+                                            height: height(5) * 4,
+                                            width : width(70),
+                                            alignItems: 'stretch',
+                                        }}
+                                        textStyle={{color: 'black'}}
+                                        dropdownTextStyle={{fontSize: height(3), textAlign: 'left', marginLeft: 20,}}
+                                        options={['Thương lượng','5:5','6:4','7:3','Nước']}
+                                        defaultIndex={0}
+                                        onSelect={(idx, type) => {
+                                            this.setState({dealType : type})
+                                        }}>
+                                        <View style={styles.box}>
+                                            <Text style={styles.text}>{this.state.dealType}</Text>
+                                            <View style={{
+                                                flex: 4,
+                                                alignItems: 'flex-end',
+                                                justifyContent: 'center',
+                                                marginRight: 10
+                                            }}>
+                                                <MaterialCommunityIcons name={"chevron-down"} size={height(3)}/>
+                                            </View>
+                                        </View>
+                                    </ModalDropdown>
+                                </View>
+
                             </View>
                             <View style={{marginTop : height(10), alignItems: 'center'}}>
                                 <View style={{
@@ -782,7 +838,7 @@ export default class Deal extends Component {
                                                 marginRight: width(15) - 40,
                                                 fontWeight: 'bold',
                                                 fontSize: 18
-                                            }}> Back </Text>
+                                            }}> Quay lại </Text>
                                         </View>
                                     </TouchableOpacity>
                                     <TouchableOpacity
@@ -798,7 +854,7 @@ export default class Deal extends Component {
                                             <Text style={{
                                                 color: 'white',
                                                 fontSize: 18,
-                                            }}> Post</Text>
+                                            }}> Đăng bài </Text>
                                         </View>
                                     </TouchableOpacity>
                                 </View>
