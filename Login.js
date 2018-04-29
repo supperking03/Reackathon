@@ -167,7 +167,7 @@ export default class Login extends Component {
 
                                  //_this.setState({ user : data.credentials });
                              }}
-                             onLoginNotFoundX={function () {
+                             onLoginNotFound={function () {
                                  console.log("No user logged in.");
                                  _this.setState({user: null});
                              }}
